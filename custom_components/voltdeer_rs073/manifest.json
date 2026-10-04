@@ -1,0 +1,16 @@
+{
+  "domain": "voltdeer_rs073",
+  "name": "Voltdeer RS073",
+  "version": "1.0.0",
+  "documentation": "https://github.com/dinpin/ha-voltdeer-rs073",
+  "issue_tracker": "https://github.com/dinpin/ha-voltdeer-rs073/issues",
+  "codeowners": ["@dinpin"],
+  "config_flow": true,
+  "zeroconf": [
+    {
+      "type": "_http._tcp.local."
+    }
+  ],
+  "iot_class": "local_polling",
+  "requirements": []
+}

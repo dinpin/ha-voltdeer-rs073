@@ -1,0 +1,31 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect Voltdeer RS073",
+        "description": "Enter the meter's local IP address or hostname. The integration reads the JSON status from the device's HTTP root page on port 80.",
+        "data": {
+          "host": "IP address or hostname"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to the meter. Check that it is online and reachable over HTTP.",
+      "invalid_response": "The response does not contain the expected em:0 meter data."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Sensor options",
+        "description": "Choose sensor groups, exclude unwanted sensors, and set how often the meter is polled. Exclusions accept comma-separated leaf keys or full dotted JSON paths.",
+        "data": {
+          "scan_interval": "Polling interval (seconds; decimals allowed)",
+          "include_measurements": "Include electrical measurements",
+          "include_diagnostics": "Include diagnostic sensors",
+          "excluded_sensors": "Excluded sensor keys or paths"
+        }
+      }
+    }
+  }
+}
