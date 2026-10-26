@@ -77,9 +77,15 @@ async def async_setup_entry(
 ) -> None:
     """Set up sensors for all current and subsequently discovered scalar fields."""
     coordinator: VoltdeerCoordinator = hass.data[DOMAIN][entry.entry_id]
+
+    # Stable id for devices/entities: the entry's unique_id never changes when
+    # the meter's IP does. (For entries created before this change it equals the
+    # IP used at creation time, so existing entity unique IDs still match.)
+    uid = entry.unique_id or coordinator.host
+
     device = DeviceInfo(
-        identifiers={(DOMAIN, coordinator.host)},
-        name=f"Voltdeer RS073 ({coordinator.host})",
+        identifiers={(DOMAIN, uid)},
+        name="Voltdeer RS073",
         manufacturer="Voltdeer",
         model="RS073",
         configuration_url=f"http://{coordinator.host}/",
@@ -114,7 +120,7 @@ async def async_setup_entry(
                 continue
 
             added_paths.add(path)
-            new_entities.append(VoltdeerSensor(coordinator, path, value, device))
+            new_entities.append(VoltdeerSensor(coordinator, path, value, device, uid))
         if new_entities:
             async_add_entities(new_entities)
 
@@ -129,7 +135,7 @@ async def async_setup_entry(
             path_name = f"derived.{key}"
             if key not in excluded and path_name not in excluded:
                 async_add_entities(
-                    [_PhaseSumEnergySensor(coordinator, key, name, phase_key, device)]
+                    [_PhaseSumEnergySensor(coordinator, key, name, phase_key, device, uid)]
                 )
 
 
@@ -147,11 +153,12 @@ class _PhaseSumEnergySensor(CoordinatorEntity[VoltdeerCoordinator], SensorEntity
         name: str,
         phase_key: str,
         device: DeviceInfo,
+        uid: str,
     ) -> None:
         super().__init__(coordinator)
         self._phase_key = phase_key
         self._attr_name = name
-        self._attr_unique_id = f"{coordinator.host}_{key}"
+        self._attr_unique_id = f"{uid}_{key}"
         self._attr_device_info = device
 
     @property
@@ -175,11 +182,12 @@ class VoltdeerSensor(CoordinatorEntity[VoltdeerCoordinator], SensorEntity):
         path: tuple[str, ...],
         initial_value: Any,
         device: DeviceInfo,
+        uid: str,
     ) -> None:
         super().__init__(coordinator)
         self.path = path
         self._attr_device_info = device
-        self._attr_unique_id = f"{coordinator.host}_{re.sub(r'[^a-zA-Z0-9_]+', '_', '.'.join(path)).lower()}"
+        self._attr_unique_id = f"{uid}_{re.sub(r'[^a-zA-Z0-9_]+', '_', '.'.join(path)).lower()}"
         self._attr_name = _display_name(path)
         self._attr_device_class, self._attr_native_unit_of_measurement, self._attr_state_class = (
             _sensor_metadata(path, initial_value)
